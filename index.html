@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FacilityFlow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f6f5f1; --panel:#ffffff; --ink:#16181d; --muted:#626873; --line:#e3e1da;
+    --accent:#0b6e4f; --accent-soft:#e3f1ea;
+    --urgent:#b42318; --urgent-soft:#fdecea; --high:#b54708; --high-soft:#fef0e1;
+    --normal:#475467; --normal-soft:#eef0f3; --ok:#067647; --ok-soft:#e6f4ec;
+    --radius:14px;
+  }
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+    --bg:#111317; --panel:#1a1d23; --ink:#eceef1; --muted:#9aa1ad; --line:#2a2e36;
+    --accent-soft:#12352a; --urgent-soft:#3a1714; --high-soft:#3a2510; --normal-soft:#252932; --ok-soft:#10301f;
+  }}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Instrument Sans",system-ui,sans-serif}
+  a{color:var(--accent)}
+  header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:5}
+  .logo{font-weight:700;letter-spacing:-.02em;font-size:18px;display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--ink)}
+  .logo i{width:22px;height:22px;border-radius:6px;background:var(--accent);display:inline-block;position:relative}
+  .logo i::after{content:"";position:absolute;inset:6px;border:2px solid #fff;border-radius:3px;border-top-color:transparent}
+  .spacer{flex:1}
+  .org-pill{font-size:13px;padding:5px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+  main{max-width:1080px;margin:0 auto;padding:28px 16px 80px}
+  h1{font-size:30px;letter-spacing:-.03em;margin:0 0 6px}
+  h2{font-size:20px;letter-spacing:-.02em;margin:0 0 12px}
+  p.lead{color:var(--muted);margin:0 0 22px;max-width:640px}
+  .grid{display:grid;gap:14px}
+  .g2{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px}
+  .org-card{cursor:pointer;transition:transform .12s, box-shadow .12s}
+  .org-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.06)}
+  .org-card .bar{height:4px;border-radius:4px;margin-bottom:14px}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  label{display:block;font-size:13px;font-weight:600;margin:12px 0 6px}
+  input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:inherit}
+  textarea{min-height:80px;resize:vertical}
+  button,.btn{appearance:none;border:0;border-radius:10px;padding:10px 16px;font:600 14px "Instrument Sans",sans-serif;cursor:pointer;background:var(--accent);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+  button.ghost,.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button.danger{background:var(--urgent)}
+  button:disabled{opacity:.55;cursor:wait}
+  .tabs{display:flex;gap:6px;margin:0 0 18px;border-bottom:1px solid var(--line)}
+  .tab{padding:10px 14px;cursor:pointer;color:var(--muted);font-weight:600;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.on{color:var(--ink);border-color:var(--accent)}
+  .badge{font-size:12px;font-weight:700;padding:3px 8px;border-radius:999px;text-transform:uppercase;letter-spacing:.03em}
+  .b-urgent{background:var(--urgent-soft);color:var(--urgent)} .b-high{background:var(--high-soft);color:var(--high)}
+  .b-normal{background:var(--normal-soft);color:var(--normal)} .b-resolved{background:var(--ok-soft);color:var(--ok)}
+  .inc{display:grid;grid-template-columns:1fr auto;gap:8px;padding:14px 16px;border-bottom:1px solid var(--line);cursor:pointer}
+  .inc:hover{background:var(--bg)} .inc:last-child{border-bottom:0}
+  .inc .meta{color:var(--muted);font-size:13px}
+  .mono{font-family:"JetBrains Mono",monospace;font-size:12px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .stat b{display:block;font-size:24px;letter-spacing:-.02em}
+  .stat span{color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+  @media (max-width:640px){.stats{grid-template-columns:repeat(2,1fr)}}
+  .photo{max-width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+  .results{margin-top:14px;display:grid;gap:6px}
+  .res{display:flex;gap:8px;align-items:center;font-size:14px;padding:8px 10px;border-radius:8px;background:var(--bg)}
+  .dot{width:8px;height:8px;border-radius:50%} .dot.ok{background:var(--ok)} .dot.no{background:var(--urgent)} .dot.skip{background:#98a2b3}
+  .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:20}
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:15}
+  .modal .card{max-width:720px;width:100%}
+  iframe.fastn{width:100%;height:640px;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
+  .hint{font-size:13px;color:var(--muted)}
+  .preview{display:flex;gap:10px;margin-top:8px} .preview img{width:120px;height:90px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+  .steps{counter-reset:s;display:grid;gap:8px;margin:10px 0 0;padding:0;list-style:none}
+  .steps li{counter-increment:s;padding-left:30px;position:relative}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:0;width:22px;height:22px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:12px;display:grid;place-items:center}
+</style>
+</head>
+<body>
+<header>
+  <a class="logo" href="#/"><i></i>FacilityFlow</a>
+  <span class="spacer"></span>
+  <span id="orgPill"></span>
+</header>
+<main id="app"></main>
+
+<script>
+const $ = (s, el=document) => el.querySelector(s);
+const app = $("#app");
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let TENANTS = [];
+const CATEGORIES = ["Water leak","Broken light","Electrical hazard","Overflowing dustbin","Damaged furniture","Broken equipment","AC / heating","Washroom issue","Fire safety","Other"];
+
+function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),3200); }
+function pin(org){ try{return sessionStorage.getItem("pin:"+org)||""}catch{return ""} }
+function setPin(org,v){ try{sessionStorage.setItem("pin:"+org,v)}catch{} }
+
+async function api(path, body, org){
+  const r = await fetch(path,{method:"POST",headers:{"content-type":"application/json","x-admin-pin":pin(org)},body:JSON.stringify(body)});
+  const j = await r.json().catch(()=>({error:"Bad response"}));
+  if(!r.ok || j.ok===false) throw new Error(j.error || ("HTTP "+r.status));
+  return j;
+}
+const wf = (org, action, extra={}) => api("/api/workflow",{org,action,...extra},org).then(j=>j.data);
+
+// Shrink photos client-side so proof uploads stay small.
+function compress(file, max=900, q=0.62){
+  return new Promise((res,rej)=>{
+    if(!file) return res(null);
+    if(!file.type.startsWith("image/")) return rej(new Error("Please choose a photo"));
+    const img=new Image(); const url=URL.createObjectURL(file);
+    img.onload=()=>{ const s=Math.min(1,max/Math.max(img.width,img.height)); const c=document.createElement("canvas");
+      c.width=Math.round(img.width*s); c.height=Math.round(img.height*s); c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+      URL.revokeObjectURL(url); res(c.toDataURL("image/jpeg",q)); };
+    img.onerror=()=>rej(new Error("Could not read photo")); img.src=url;
+  });
+}
+
+function badge(inc){
+  if(inc.status==="resolved") return `<span class="badge b-resolved">Resolved</span>`;
+  return `<span class="badge b-${esc(inc.priority)}">${esc(inc.priority)}</span>`;
+}
+function resultsHtml(list){
+  if(!list||!list.length) return "";
+  return `<div class="results">${list.map(r=>`<div class="res"><span class="dot ${r.ok?"ok":r.skipped?"skip":"no"}"></span><b>${esc(r.app)}</b><span>${esc(r.label)}</span>${!r.ok?`<span class="hint">— ${esc(r.skipped?"not set up yet":r.detail)}</span>`:""}</div>`).join("")}</div>`;
+}
+function setOrgPill(t){ $("#orgPill").innerHTML = t?`<span class="org-pill">${esc(t.name)}</span>`:""; if(t) document.documentElement.style.setProperty("--accent",t.accent); }
+
+// ---------- views ----------
+function home(){
+  setOrgPill(null);
+  app.innerHTML = `
+    <h1>Campus problems, routed to the people who fix them.</h1>
+    <p class="lead">Students report a leak, a dead light or an overflowing bin with a photo. FacilityFlow classifies it, escalates repeat reports to <b>urgent</b>, notifies the facilities team in the tools they already use, and keeps reminding them until someone uploads proof that it's fixed.</p>
+    <h2>Choose your organisation</h2>
+    <div class="grid g2">${TENANTS.map(t=>`
+      <div class="card org-card">
+        <div class="bar" style="background:${esc(t.accent)}"></div>
+        <h2 style="margin-bottom:4px">${esc(t.name)}</h2>
+        <p class="hint" style="margin:0 0 14px">Separate workspace, separate connected accounts, separate data.</p>
+        <div class="row"><a class="btn" href="#/r/${esc(t.ref)}">Report a problem</a><a class="btn ghost" href="#/a/${esc(t.ref)}">Facilities admin</a></div>
+      </div>`).join("")}</div>`;
+}
+
+function reportView(t){
+  setOrgPill(t);
+  app.innerHTML = `
+    <h1>Report a campus problem</h1>
+    <p class="lead">${esc(t.name)} · Add a photo as proof. If others report the same thing, it gets escalated automatically.</p>
+    <div class="card" style="max-width:640px">
+      <form id="f">
+        <label>What's the problem?</label>
+        <select name="category" required>${CATEGORIES.map(c=>`<option>${c}</option>`).join("")}</select>
+        <label>Where exactly?</label>
+        <input name="location" required placeholder="e.g. Block A, 2nd floor corridor">
+        <label>Details (optional)</label>
+        <textarea name="description" placeholder="What did you see?"></textarea>
+        <label>Your name (optional)</label>
+        <input name="reporter" placeholder="Anonymous student">
+        <label>Photo proof</label>
+        <input name="photo" type="file" accept="image/*" capture="environment">
+        <div class="preview" id="pv"></div>
+        <div class="row" style="margin-top:16px"><button id="sb">Submit report</button><a class="btn ghost" href="#/">Back</a></div>
+      </form>
+      <div id="out"></div>
+    </div>`;
+  const f=$("#f"); let photo=null;
+  f.photo.onchange=async()=>{ try{ photo=await compress(f.photo.files[0]); $("#pv").innerHTML=photo?`<img src="${photo}">`:""; }catch(e){ toast(e.message); } };
+  f.onsubmit=async(e)=>{ e.preventDefault(); const b=$("#sb"); b.disabled=true; b.textContent="Sending…";
+    try{
+      const d=await wf(t.ref,"report",{category:f.category.value,location:f.location.value,description:f.description.value,reporter:f.reporter.value,photo});
+      const msg = d.outcome==="created"?"New issue logged.":d.outcome==="escalated"?`Reported ${d.incident.report_count} times — now marked URGENT.`:`Added to an existing report (${d.incident.report_count} reports so far).`;
+      $("#out").innerHTML=`<div class="card" style="margin-top:14px;background:var(--bg)"><div class="row">${badge(d.incident)}<b>${esc(msg)}</b></div><p class="mono">${esc(d.incident.id)}</p>${resultsHtml(d.integrations)}</div>`;
+      f.reset(); photo=null; $("#pv").innerHTML="";
+    }catch(err){ toast(err.message); }
+    b.disabled=false; b.textContent="Submit report"; };
+}
+
+function adminLogin(t){
+  setOrgPill(t);
+  app.innerHTML=`<div class="card" style="max-width:420px;margin:40px auto">
+    <h2>${esc(t.name)} · Facilities admin</h2>
+    <p class="hint">Enter the admin PIN for this organisation.</p>
+    <form id="lf"><input name="p" type="password" placeholder="Admin PIN" required autofocus>
+    <div class="row" style="margin-top:12px"><button>Sign in</button><a class="btn ghost" href="#/">Back</a></div></form></div>`;
+  $("#lf").onsubmit=(e)=>{ e.preventDefault(); setPin(t.ref,e.target.p.value); route(); };
+}
+
+async function adminView(t, tab){
+  setOrgPill(t);
+  if(!pin(t.ref)) return adminLogin(t);
+  tab = tab || "incidents";
+  app.innerHTML=`
+    <div class="row" style="margin-bottom:10px"><h1 style="margin:0">Facilities dashboard</h1><span class="spacer"></span>
+      <a class="btn ghost" href="#/r/${esc(t.ref)}">Student report page ↗</a></div>
+    <div class="tabs">
+      ${[["incidents","Incidents"],["connect","Connect your tools"],["settings","Settings"]].map(([k,l])=>`<a class="tab ${tab===k?"on":""}" href="#/a/${esc(t.ref)}/${k}">${l}</a>`).join("")}
+    </div><div id="pane"><p class="hint">Loading…</p></div>`;
+  try{
+    if(tab==="incidents") await incidentsPane(t);
+    else if(tab==="connect") await connectPane(t);
+    else await settingsPane(t);
+  }catch(e){
+    if(/PIN/.test(e.message)){ setPin(t.ref,""); toast("Wrong PIN"); return adminLogin(t); }
+    $("#pane").innerHTML=`<div class="card"><b>Something went wrong</b><p class="hint">${esc(e.message)}</p></div>`;
+  }
+}
+
+async function incidentsPane(t){
+  const { incidents } = await wf(t.ref,"list");
+  const open = incidents.filter(i=>i.status!=="resolved");
+  const n=(f)=>incidents.filter(f).length;
+  $("#pane").innerHTML=`
+    <div class="stats">
+      <div class="stat"><span>Open</span><b>${open.length}</b></div>
+      <div class="stat"><span>Urgent</span><b style="color:var(--urgent)">${n(i=>i.priority==="urgent"&&i.status!=="resolved")}</b></div>
+      <div class="stat"><span>Resolved</span><b style="color:var(--ok)">${n(i=>i.status==="resolved")}</b></div>
+      <div class="stat"><span>Total reports</span><b>${incidents.reduce((a,i)=>a+(i.report_count||1),0)}</b></div>
+    </div>
+    <div class="row" style="margin-bottom:12px"><button class="ghost" id="rf">Refresh</button><button class="ghost" id="rm">Send reminders now</button>
+      <span class="hint">Reminders also run automatically on a schedule for urgent, unresolved issues.</span></div>
+    <div class="card" style="padding:0">${incidents.length?incidents.map(i=>`
+      <div class="inc" data-id="${esc(i.id)}">
+        <div><div class="row"><b>${esc(i.category)}</b><span class="meta">· ${esc(i.location)}</span></div>
+          <div class="meta">${i.report_count} report${i.report_count>1?"s":""} · ${new Date(i.created_at).toLocaleString()} · <span class="mono">${esc(i.id)}</span>${i.reminders_sent?` · ${i.reminders_sent} reminder(s) sent`:""}</div></div>
+        <div>${badge(i)}</div></div>`).join(""):`<p class="hint" style="padding:18px">No incidents yet. Share the student report page to get started.</p>`}</div>`;
+  $("#rf").onclick=()=>route();
+  $("#rm").onclick=async(e)=>{ e.target.disabled=true; try{ const d=await wf(t.ref,"remind",{intervalMinutes:1}); toast(d.reminded?`Sent ${d.reminded} reminder(s)`:"No urgent issues need a reminder right now"); route(); }catch(err){ toast(err.message);} e.target.disabled=false; };
+  app.querySelectorAll(".inc").forEach(el=>el.onclick=()=>openIncident(t, el.dataset.id));
+}
+
+async function openIncident(t,id){
+  const m=document.createElement("div"); m.className="modal"; m.innerHTML=`<div class="card"><p class="hint">Loading…</p></div>`; document.body.appendChild(m);
+  m.onclick=(e)=>{ if(e.target===m) m.remove(); };
+  try{
+    const { incident:i } = await wf(t.ref,"get",{id});
+    m.firstElementChild.innerHTML=`
+      <div class="row">${badge(i)}<h2 style="margin:0">${esc(i.category)}</h2><span class="spacer"></span><button class="ghost" id="x">Close</button></div>
+      <p class="meta">${esc(i.location)} · <span class="mono">${esc(i.id)}</span> · ${i.report_count} report(s)</p>
+      <p>${esc(i.description)||"<span class='hint'>No description</span>"}</p>
+      <div class="grid g2">
+        <div><label>Reported photo</label>${i.photo?`<img class="photo" src="${i.photo}">`:`<p class="hint">No photo</p>`}${i.drive_link?`<p><a href="${esc(i.drive_link)}" target="_blank">Open in Google Drive ↗</a></p>`:""}</div>
+        <div><label>Resolution proof</label>${i.proof_photo?`<img class="photo" src="${i.proof_photo}"><p class="hint">By ${esc(i.resolved_by)} · ${new Date(i.resolved_at).toLocaleString()}</p>${i.proof_drive_link?`<p><a href="${esc(i.proof_drive_link)}" target="_blank">Open in Google Drive ↗</a></p>`:""}`:`<p class="hint">Not resolved yet</p>`}</div>
+      </div>
+      <label>Reports</label><div class="hint">${(i.reporters||[]).map(r=>`${esc(r.name)} — ${new Date(r.at).toLocaleString()}`).join("<br>")}</div>
+      ${i.status!=="resolved"?`<form id="rv" style="margin-top:16px;border-top:1px solid var(--line);padding-top:8px">
+        <h2 style="margin-top:10px">Mark as resolved</h2>
+        <label>Proof photo of the fix (required)</label><input type="file" name="p" accept="image/*" capture="environment" required>
+        <div class="preview" id="pp"></div>
+        <label>Resolved by</label><input name="by" placeholder="e.g. Plumbing team - Ahmed">
+        <label>Note</label><textarea name="note" placeholder="What was done?"></textarea>
+        <div class="row" style="margin-top:12px"><button id="rb">Resolve and stop reminders</button></div></form><div id="rout"></div>`:""}`;
+    $("#x").onclick=()=>m.remove();
+    const f=$("#rv",m); if(!f) return; let proof=null;
+    f.p.onchange=async()=>{ try{ proof=await compress(f.p.files[0]); $("#pp",m).innerHTML=`<img src="${proof}">`; }catch(e){ toast(e.message);} };
+    f.onsubmit=async(e)=>{ e.preventDefault(); if(!proof) return toast("Add a proof photo"); const b=$("#rb",m); b.disabled=true; b.textContent="Resolving…";
+      try{ const d=await wf(t.ref,"resolve",{id:i.id,proofPhoto:proof,resolvedBy:f.by.value,note:f.note.value});
+        $("#rout",m).innerHTML=`<div class="card" style="margin-top:12px;background:var(--bg)"><b>Resolved.</b> Reminders have stopped.${resultsHtml(d.integrations)}</div>`; f.remove(); route();
+      }catch(err){ toast(err.message); b.disabled=false; b.textContent="Resolve and stop reminders"; } };
+  }catch(e){ m.firstElementChild.innerHTML=`<b>Could not load</b><p class="hint">${esc(e.message)}</p>`; }
+}
+
+async function connectPane(t){
+  $("#pane").innerHTML=`
+    <div class="grid" style="grid-template-columns:minmax(0,1fr)">
+      <div class="card">
+        <h2>Connect ${esc(t.name)}'s own tools</h2>
+        <p class="hint" style="margin-top:0">Sign in with your organisation's accounts below. FacilityFlow never sees your passwords, and nothing here is shared with any other organisation.</p>
+        <ol class="steps">
+          <li><b>Gmail</b> — department emails for new, urgent and resolved issues</li>
+          <li><b>Google Sheets</b> — a live incident log (created automatically)</li>
+          <li><b>Google Drive</b> — photo proof for every report and every fix</li>
+          <li><b>Google Calendar</b> — repair visits booked when an issue turns urgent</li>
+          <li><b>Telegram</b> — instant alerts to your facilities team (paste your bot token)</li>
+        </ol>
+      </div>
+      <div id="embed"><p class="hint">Loading your secure connection panel…</p></div>
+    </div>`;
+  try{
+    const { iframeUrl } = await api("/api/embed-token",{org:t.ref},t.ref);
+    $("#embed").innerHTML=`<iframe class="fastn" src="${esc(iframeUrl)}" allow="clipboard-write" referrerpolicy="strict-origin-when-cross-origin" title="Connect your tools"></iframe>
+      <p class="hint">After connecting Telegram, send any message to your bot, then press “Detect Telegram chat” in Settings.</p>`;
+  }catch(e){ $("#embed").innerHTML=`<div class="card"><b>Connection panel unavailable</b><p class="hint">${esc(e.message)}</p></div>`; }
+}
+
+async function settingsPane(t){
+  const { settings:s } = await wf(t.ref,"getSettings");
+  const d=s.deptEmails||{};
+  $("#pane").innerHTML=`<div class="card" style="max-width:720px"><form id="sf">
+    <h2>Notification routing</h2>
+    <label>Organisation display name</label><input name="universityName" value="${esc(s.universityName||t.name)}">
+    <label>Default facilities email (receives everything not routed below)</label><input name="adminEmail" type="email" value="${esc(s.adminEmail)}" placeholder="facilities@university.edu">
+    <div class="grid g2">
+      ${["Water leak","Washroom issue","Broken light","Electrical hazard","Overflowing dustbin","Broken equipment"].map(c=>`<div><label>${c} → email</label><input data-dept="${esc(c)}" value="${esc(d[c]||"")}" placeholder="optional"></div>`).join("")}
+    </div>
+    <h2 style="margin-top:22px">Escalation</h2>
+    <div class="grid g2">
+      <div><label>Reports before an issue becomes URGENT</label><input name="escalationThreshold" type="number" min="2" value="${esc(s.escalationThreshold)}"></div>
+      <div><label>Reminder every (minutes) while urgent & unresolved</label><input name="reminderIntervalMinutes" type="number" min="1" value="${esc(s.reminderIntervalMinutes)}"><p class="hint">4320 = every 3 days.</p></div>
+    </div>
+    <h2 style="margin-top:22px">Telegram</h2>
+    <p class="hint">Chat: <span class="mono">${s.telegramChatId?esc(s.telegramChatId):"not linked"}</span></p>
+    <div class="row"><button type="button" class="ghost" id="tg">Detect Telegram chat</button>
+      ${s.spreadsheetId?`<a class="btn ghost" target="_blank" href="https://docs.google.com/spreadsheets/d/${esc(s.spreadsheetId)}">Open incident log sheet ↗</a>`:""}</div>
+    <div class="row" style="margin-top:20px"><button>Save settings</button></div></form></div>`;
+  $("#tg").onclick=async(e)=>{ e.target.disabled=true; try{ const r=await wf(t.ref,"detectTelegram"); toast(r.found?`Linked to ${r.chatTitle||r.chatId}`:r.hint); if(r.found) route(); }catch(err){ toast(err.message);} e.target.disabled=false; };
+  $("#sf").onsubmit=async(e)=>{ e.preventDefault(); const f=e.target; const dept={};
+    f.querySelectorAll("[data-dept]").forEach(i=>{ if(i.value.trim()) dept[i.dataset.dept]=i.value.trim(); });
+    try{ await wf(t.ref,"saveSettings",{settings:{universityName:f.universityName.value,adminEmail:f.adminEmail.value,deptEmails:dept,escalationThreshold:Number(f.escalationThreshold.value),reminderIntervalMinutes:Number(f.reminderIntervalMinutes.value)}}); toast("Saved"); }
+    catch(err){ toast(err.message); } };
+}
+
+// ---------- router ----------
+async function route(){
+  if(!TENANTS.length){ try{ TENANTS=(await (await fetch("/api/tenants")).json()).tenants; }catch{ app.innerHTML="<p>Could not load organisations.</p>"; return; } }
+  const [, kind, org, tab] = (location.hash.replace(/^#/,"")||"/").split("/");
+  const t = TENANTS.find(x=>x.ref===org);
+  document.documentElement.style.setProperty("--accent", t ? t.accent : "#0b6e4f");
+  if(kind==="r" && t) return reportView(t);
+  if(kind==="a" && t) return adminView(t, tab);
+  home();
+}
+window.addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>

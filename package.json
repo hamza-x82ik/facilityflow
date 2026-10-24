@@ -1,0 +1,7 @@
+{
+  "name": "facilityflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "FacilityFlow - multi-tenant campus maintenance & incident platform with Fastn embedded integrations",
+  "engines": { "node": ">=18" }
+}
