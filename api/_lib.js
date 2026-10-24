@@ -42,7 +42,7 @@ async function readJson(r) {
 // Run the multi-tenant workflow AS the given tenant: Fastn resolves that tenant's own
 // connections (Gmail, Sheets, Drive, Calendar, Telegram) and the workflow scopes rows to it.
 async function runWorkflow(tenant, userId, input) {
-  const headers = { ...identityHeaders(tenant.ref, userId), "x-end-org-id": tenant.fastnId };
+     const headers = identityHeaders(tenant.ref, userId);
   const r = await fetch(`${FASTN_API}${PREFIX}/workflows/${encodeURIComponent(WORKFLOW)}/execute`, {
     method: "POST",
     headers,
