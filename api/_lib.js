@@ -15,7 +15,7 @@ const TENANTS = process.env.TENANTS_JSON
   ? JSON.parse(process.env.TENANTS_JSON)
   : {
       nutech: { name: "NUTECH Islamabad", fastnId: "b9286270-d694-4f3c-a79d-569babfc46c2", accent: "#0b6e4f" },
-      riverside: { name: "Riverside University", fastnId: "e4ad9608-cde1-4961-9b81-6b0d646044c2", accent: "#1d4ed8" },
+      riverside: { name: "NUST University", fastnId: "e4ad9608-cde1-4961-9b81-6b0d646044c2", accent: "#1d4ed8" },
     };
 
 function tenantOr404(ref, res) {
